@@ -3,7 +3,10 @@
 ![Animation](animation.gif)
 
 [![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/thepollitosd/paclytics)
-
+![Stars](https://img.shields.io/github/stars/thepollitosd/paclytics?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/thepollitosd/paclytics?style=for-the-badge)
+![Last Commit](https://img.shields.io/github/last-commit/thepollitosd/paclytics?style=for-the-badge)
+![License](https://img.shields.io/github/license/thepollitosd/paclytics?style=for-the-badge)
 ## Overview
 
 Paclytics (Scout Analytics) is a high-performance desktop application for FIRST Robotics Competition (FRC) match analysis and prediction. It leverages data from The Blue Alliance (TBA) API and applies a sophisticated statistical model to provide deep, actionable insights into team and alliance performance. The application features a sleek, responsive interface built with PyQt6, designed for scouts and strategists who need to make data-driven decisions quickly.
