@@ -1,5 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
 
+if sys.platform == 'darwin':
+    icon_file = 'icon.icns'
+elif sys.platform == 'win32':
+    icon_file = 'icon.ico'
+else:
+    icon_file = 'icon.ico'
 
 a = Analysis(
     ['scout.py'],
@@ -15,7 +22,6 @@ a = Analysis(
     optimize=0,
 )
 pyz = PYZ(a.pure)
-
 exe = EXE(
     pyz,
     a.scripts,
@@ -35,5 +41,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['icon.ico'],
+    icon=[icon_file],
 )
