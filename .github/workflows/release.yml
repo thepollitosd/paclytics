@@ -1,0 +1,129 @@
+name: Build & Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  build:
+    # Only run when the PR is actually merged (not just closed)
+    if: github.event.pull_request.merged == true
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: Paclytics-windows
+            zip_cmd: pwsh -Command "Compress-Archive -Path dist/scout -DestinationPath dist/Paclytics-windows.zip"
+          - os: macos-latest
+            artifact_name: Paclytics-macos
+            zip_cmd: zip -r dist/Paclytics-macos.zip dist/scout
+          - os: ubuntu-latest
+            artifact_name: Paclytics-linux
+            zip_cmd: zip -r dist/Paclytics-linux.zip dist/scout
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Linux system dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1 \
+            libegl1 \
+            libxkbcommon-x11-0 \
+            libdbus-1-3 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xfixes0
+
+      - name: Install Python dependencies
+        run: |
+          pip install git+https://github.com/TBA-API/tba-api-client-python.git
+          pip install numpy scipy PyQt6 PyQt6-WebEngine pyinstaller
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller scout.spec
+
+      - name: Zip the build output
+        run: ${{ matrix.zip_cmd }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}.zip
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if echo "$PR_TITLE" | grep -qE '^v[0-9]+\.[0-9]+'; then
+            VERSION=$(echo "$PR_TITLE" | grep -oE 'v[0-9]+\.[0-9]+[^ ]*' | head -1)
+          else
+            VERSION="v$(date +'%Y.%m.%d')-$(echo $GITHUB_SHA | cut -c1-7)"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          name: "Paclytics ${{ steps.tag.outputs.version }}"
+          body: |
+            ## Paclytics ${{ steps.tag.outputs.version }}
+
+            Automatically built from PR #${{ github.event.pull_request.number }}: **${{ github.event.pull_request.title }}**
+
+            ### Changes
+            ${{ github.event.pull_request.body }}
+
+            ---
+            | Platform | Download |
+            |----------|----------|
+            | 🪟 Windows | `Paclytics-windows.zip` |
+            | 🍎 macOS   | `Paclytics-macos.zip`   |
+            | 🐧 Linux   | `Paclytics-linux.zip`   |
+
+            Extract the zip and run the `scout` executable inside.
+          files: |
+            artifacts/Paclytics-windows/Paclytics-windows.zip
+            artifacts/Paclytics-macos/Paclytics-macos.zip
+            artifacts/Paclytics-linux/Paclytics-linux.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
