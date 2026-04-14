@@ -285,7 +285,6 @@ def load_match_labels(team_key, event_key):
             ms = match_api.get_team_event_matches(team_key=team_key, event_key=event_key)
     except: return []
     labels = []
-    # Sort matches chronologically
     def get_match_time(m):
         comp_order = {'qm': 1, 'ef': 2, 'qf': 3, 'sf': 4, 'f': 5}
         cl = getattr(m, 'comp_level', 'qm')
@@ -301,10 +300,11 @@ def load_match_labels(team_key, event_key):
     return labels
 
 # ─── HTML Header (Shared Base) ───────────────────────────────────────────────
-def get_html_head():
-    return """
+def get_html_head(is_light_mode):
+    mode_class = "" if is_light_mode else "dark"
+    return f"""
     <!DOCTYPE html>
-    <html class="dark" lang="en">
+    <html class="{mode_class}" lang="en">
     <head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -312,46 +312,103 @@ def get_html_head():
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
         <script>
-            tailwind.config = {
+            tailwind.config = {{
                 darkMode: "class",
-                theme: {
-                    extend: {
-                        colors: {
+                theme: {{
+                    extend: {{
+                        colors: {{
                             "tertiary": "#74f5ff",
+                            "tertiary-light": "#0077b6",
                             "secondary": "#ffb3ae",
+                            "secondary-light": "#d90429",
                             "surface-dim": "#131315",
                             "surface-container-low": "#1c1b1e",
                             "surface-container-lowest": "#0e0e10",
                             "secondary-container": "#930014",
-                        },
-                        fontFamily: {
+                        }},
+                        fontFamily: {{
                             "headline": ["Space Grotesk", "sans-serif"],
                             "body": ["Inter", "sans-serif"],
                             "mono": ["JetBrains Mono", "monospace"]
-                        }
-                    }
-                }
-            }
+                        }}
+                    }}
+                }}
+            }}
         </script>
         <style>
-            .grain-overlay { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; }
-            .glow-red { text-shadow: 0 0 25px rgba(255, 179, 174, 0.4); }
-            .glow-cyan { text-shadow: 0 0 25px rgba(116, 245, 255, 0.4); }
-            .table-cell-custom { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; }
-            .table-header-custom { padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; text-align: right; }
-            ::-webkit-scrollbar { width: 8px; height: 8px; }
-            ::-webkit-scrollbar-track { background: #08080A; }
-            ::-webkit-scrollbar-thumb { background: #1c1b1e; }
-            ::-webkit-scrollbar-thumb:hover { background: #353437; }
+            .grain-overlay {{ background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; }}
+            .dark .grain-overlay {{ opacity: 0.04; }}
+            
+            .glow-red {{ text-shadow: 0 0 15px rgba(217, 4, 41, 0.4); }}
+            .dark .glow-red {{ text-shadow: 0 0 25px rgba(255, 179, 174, 0.4); }}
+            
+            .glow-cyan {{ text-shadow: 0 0 15px rgba(0, 119, 182, 0.4); }}
+            .dark .glow-cyan {{ text-shadow: 0 0 25px rgba(116, 245, 255, 0.4); }}
+            
+            .table-cell-custom {{ padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; }}
+            .dark .table-cell-custom {{ border-bottom: 1px solid rgba(255,255,255,0.05); }}
+            
+            .table-header-custom {{ padding-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 0.1em; text-align: right; }}
+            .dark .table-header-custom {{ border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }}
+            
+            ::-webkit-scrollbar {{ width: 8px; height: 8px; }}
+            ::-webkit-scrollbar-track {{ background: #f8fafc; }}
+            .dark ::-webkit-scrollbar-track {{ background: #08080A; }}
+            ::-webkit-scrollbar-thumb {{ background: #cbd5e1; }}
+            .dark ::-webkit-scrollbar-thumb {{ background: #1c1b1e; }}
+            ::-webkit-scrollbar-thumb:hover {{ background: #94a3b8; }}
+            .dark ::-webkit-scrollbar-thumb:hover {{ background: #353437; }}
         </style>
     </head>
-    <body class="bg-[#08080A] text-[#e5e1e4] font-body selection:bg-tertiary selection:text-black min-h-screen">
+    <body class="bg-gray-50 dark:bg-[#08080A] text-gray-900 dark:text-[#e5e1e4] font-body selection:bg-tertiary-light dark:selection:bg-tertiary selection:text-white dark:selection:text-black min-h-screen transition-colors duration-300">
         <div class="fixed inset-0 grain-overlay z-[100]"></div>
+    """
+
+def get_loading_html(is_light_mode):
+    mode_class = "" if is_light_mode else "dark"
+    return f"""
+    <!DOCTYPE html>
+    <html class="{mode_class}" lang="en">
+    <head>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>tailwind.config = {{ darkMode: 'class', theme: {{ extend: {{ colors: {{ 'tertiary': '#74f5ff', 'tertiary-light': '#0077b6' }} }} }} }}</script>
+        <style>
+            @keyframes load {{ 0% {{ transform: translateX(-100%); }} 100% {{ transform: translateX(200%); }} }}
+            @keyframes pulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.5; }} }}
+        </style>
+    </head>
+    <body class="bg-gray-50 dark:bg-[#08080A] flex justify-center items-center h-screen m-0 transition-colors duration-300">
+        <div class="text-center">
+            <div class="text-tertiary-light dark:text-tertiary font-mono text-xs tracking-[0.2em] mb-4 animate-pulse uppercase">Processing Data Cube</div>
+            <div class="w-48 h-0.5 bg-gray-200 dark:bg-[#1c1b1e] mx-auto overflow-hidden relative">
+                <div class="w-1/2 h-full bg-tertiary-light dark:bg-tertiary absolute left-0" style="animation: load 1s infinite linear;"></div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+def get_placeholder_html(is_light_mode):
+    mode_class = "" if is_light_mode else "dark"
+    return f"""
+    <!DOCTYPE html>
+    <html class="{mode_class}" lang="en">
+    <head>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>tailwind.config = {{ darkMode: 'class', theme: {{ extend: {{ colors: {{ 'tertiary': '#74f5ff', 'tertiary-light': '#008b99' }} }} }} }}</script>
+    </head>
+    <body class="bg-gray-50 dark:bg-[#08080A] text-gray-900 dark:text-[#e5e1e4] flex justify-center items-center h-screen m-0 transition-colors duration-300 font-sans">
+        <div class="text-center">
+            <div class="text-tertiary-light dark:text-tertiary font-mono text-xs tracking-[0.2em] mb-3 uppercase">System Offline</div>
+            <h1 class="text-2xl font-bold tracking-widest uppercase text-gray-800 dark:text-white">Awaiting Event Selection</h1>
+        </div>
+    </body>
+    </html>
     """
 
 # ─── View Generators ──────────────────────────────────────────────────────────
 
-def build_leaderboard_html(event_selected, event_key):
+def build_leaderboard_html(event_selected, event_key, is_light_mode):
     event_matches = extract_event_match_data(event_key)
     if not event_matches: return f'<div style="color:#ff6b6b; padding: 40px; font-family:sans-serif;">No match data available for {event_selected}.</div>'
 
@@ -395,30 +452,30 @@ def build_leaderboard_html(event_selected, event_key):
     rows = ""
     for i, td in enumerate(teams_data):
         rows += f'''
-        <tr onclick="window.location.href='scout://team/{td['key']}'" class="cursor-pointer hover:bg-white/10 transition-colors">
-            <td class="table-cell-custom text-left pl-4 font-bold text-tertiary">#{i+1}</td>
-            <td class="table-cell-custom text-left text-white/90 font-bold">{td['key']}</td>
-            <td class="table-cell-custom text-secondary glow-red font-bold">{td['impact']:.1f}</td>
-            <td class="table-cell-custom text-white/70">{td['afr']:.1f}</td>
-            <td class="table-cell-custom text-white/70">{td['osr']:.1f}</td>
-            <td class="table-cell-custom text-white/70">{td['dsr']:.1f}</td>
-            <td class="table-cell-custom text-white/70">{td['efr']:.1f}</td>
+        <tr onclick="window.location.href='scout://team/{td['key']}'" class="cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+            <td class="table-cell-custom text-left pl-4 font-bold text-tertiary-light dark:text-tertiary">#{i+1}</td>
+            <td class="table-cell-custom text-left text-gray-900 dark:text-white/90 font-bold">{td['key']}</td>
+            <td class="table-cell-custom text-secondary-light dark:text-secondary glow-red font-bold">{td['impact']:.1f}</td>
+            <td class="table-cell-custom text-gray-600 dark:text-white/70">{td['afr']:.1f}</td>
+            <td class="table-cell-custom text-gray-600 dark:text-white/70">{td['osr']:.1f}</td>
+            <td class="table-cell-custom text-gray-600 dark:text-white/70">{td['dsr']:.1f}</td>
+            <td class="table-cell-custom text-gray-600 dark:text-white/70">{td['efr']:.1f}</td>
         </tr>
         '''
 
     html_body = f"""
     <main class="max-w-4xl mx-auto pt-10 pb-20 px-6 relative z-10">
-        <header class="flex justify-between items-center border-b border-white/10 pb-4 mb-10">
+        <header class="flex justify-between items-center border-b border-gray-200 dark:border-white/10 pb-4 mb-10">
             <div class="flex items-center gap-4">
-                <h1 class="font-headline font-bold text-2xl text-white tracking-widest">EVENT LEADERBOARD</h1>
+                <h1 class="font-headline font-bold text-2xl text-gray-900 dark:text-white tracking-widest">EVENT LEADERBOARD</h1>
             </div>
             <div class="text-right">
-                <span class="font-mono text-[10px] text-tertiary tracking-[0.2em] uppercase block">Scout Analytics</span>
-                <span class="font-headline text-xs text-white/40 tracking-widest uppercase">{event_selected}</span>
+                <span class="font-mono text-[10px] text-tertiary-light dark:text-tertiary tracking-[0.2em] uppercase block">Scout Analytics</span>
+                <span class="font-headline text-xs text-gray-500 dark:text-white/40 tracking-widest uppercase">{event_selected}</span>
             </div>
         </header>
 
-        <section class="bg-[#0e0e10] p-1 border border-white/5 overflow-x-auto">
+        <section class="bg-white dark:bg-[#0e0e10] p-1 border border-gray-200 dark:border-white/5 overflow-x-auto shadow-sm dark:shadow-none">
             <table class="w-full whitespace-nowrap">
                 <thead>
                     <tr>
@@ -440,29 +497,29 @@ def build_leaderboard_html(event_selected, event_key):
     </body>
     </html>
     """
-    return get_html_head() + html_body
+    return get_html_head(is_light_mode) + html_body
 
-def build_schedule_html(event_selected, event_key, team_key):
+def build_schedule_html(event_selected, event_key, team_key, is_light_mode):
     matches = load_match_labels(team_key, event_key)
     
     rows = ""
     for lbl, m_key in matches:
         rows += f'''
-        <div onclick="window.location.href='scout://match/{m_key}'" class="bg-[#1c1b1e]/60 p-4 border-l-2 border-tertiary/50 mb-2 cursor-pointer hover:bg-tertiary/20 transition-colors flex justify-between items-center">
-            <span class="font-headline font-bold text-white tracking-widest">{lbl}</span>
-            <span class="font-mono text-xs text-white/40">VIEW MATCH &rarr;</span>
+        <div onclick="window.location.href='scout://match/{m_key}'" class="bg-white dark:bg-[#1c1b1e]/60 p-4 border-l-2 border-tertiary-light/50 dark:border-tertiary/50 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-tertiary/20 transition-colors flex justify-between items-center shadow-sm dark:shadow-none">
+            <span class="font-headline font-bold text-gray-900 dark:text-white tracking-widest">{lbl}</span>
+            <span class="font-mono text-xs text-gray-400 dark:text-white/40">VIEW MATCH &rarr;</span>
         </div>
         '''
 
     html_body = f"""
     <main class="max-w-2xl mx-auto pt-10 pb-20 px-6 relative z-10">
-        <div onclick="window.location.href='scout://leaderboard'" class="cursor-pointer text-secondary mb-6 font-mono text-xs hover:text-white transition-colors flex items-center gap-2">
+        <div onclick="window.location.href='scout://leaderboard'" class="cursor-pointer text-secondary-light dark:text-secondary mb-6 font-mono text-xs hover:text-red-700 dark:hover:text-white transition-colors flex items-center gap-2">
             <span>&larr;</span> BACK TO LEADERBOARD
         </div>
 
-        <header class="border-b border-white/10 pb-4 mb-10">
-            <h1 class="font-headline font-bold text-3xl text-tertiary glow-cyan tracking-widest">{team_key.upper()}</h1>
-            <span class="font-headline text-xs text-white/40 tracking-widest uppercase mt-2 block">{event_selected} SCHEDULE</span>
+        <header class="border-b border-gray-200 dark:border-white/10 pb-4 mb-10">
+            <h1 class="font-headline font-bold text-3xl text-tertiary-light dark:text-tertiary glow-cyan tracking-widest">{team_key.upper()}</h1>
+            <span class="font-headline text-xs text-gray-500 dark:text-white/40 tracking-widest uppercase mt-2 block">{event_selected} SCHEDULE</span>
         </header>
 
         <section>
@@ -472,19 +529,16 @@ def build_schedule_html(event_selected, event_key, team_key):
     </body>
     </html>
     """
-    return get_html_head() + html_body
+    return get_html_head(is_light_mode) + html_body
 
-# Change the parameters to accept BOTH event_label and event_key
-def build_html_report(event_label, event_key, team_selected, match_selected):
+def build_html_report(event_label, event_key, team_selected, match_selected, is_light_mode):
     try: selected_match = match_api.get_match(match_key=match_selected)
     except Exception as exc: return f'<div style="color:#ff6b6b; padding: 40px; font-family:sans-serif;">Error: {exc}</div>'
 
-    # USE THE EVENT_KEY HERE FOR THE API
     event_matches = extract_event_match_data(event_key)
     if not event_matches: return '<div style="color:#ff6b6b; padding: 40px; font-family:sans-serif;">No match data available.</div>'
 
     def get_match_time(m):
-# ... (Keep the rest of the function the same until the HTML section) ...
         comp_order = {'qm': 1, 'ef': 2, 'qf': 3, 'sf': 4, 'f': 5}
         cl = getattr(m, 'comp_level', 'qm')
         return (getattr(m, 'actual_time', None) or getattr(m, 'time', 0) or 0, comp_order.get(cl, 0))
@@ -521,7 +575,7 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
     winner = 'Red' if r_perf >= b_perf else 'Blue'
     margin = abs(r_perf - b_perf)
     
-    w_color_class = "text-secondary glow-red" if winner == 'Red' else "text-tertiary glow-cyan"
+    w_color_class = "text-secondary-light dark:text-secondary glow-red" if winner == 'Red' else "text-tertiary-light dark:text-tertiary glow-cyan"
 
     def cl(m): return 'narrowly' if m < 25 else ('comfortably' if m < 50 else 'decisively')
     outcome = random.choice(OUTCOME_PHRASES).format(winner=winner, label=cl(margin), winner_performance=r_perf if winner=='Red' else b_perf, loser_performance=b_perf if winner=='Red' else r_perf)
@@ -529,8 +583,13 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
 
     def shift_bars(data, color_theme):
         mx = max(data['shift_scores'].values() or [1])
-        base_bg = "bg-secondary/10 border-secondary/30" if color_theme == 'red' else "bg-tertiary/10 border-tertiary/30"
-        fill_bg = "bg-secondary/60 border-secondary glow-red" if color_theme == 'red' else "bg-tertiary/60 border-tertiary glow-cyan"
+        if color_theme == 'red':
+            base_bg = "bg-secondary-light/10 dark:bg-secondary/10 border-secondary-light/30 dark:border-secondary/30"
+            fill_bg = "bg-secondary-light/60 dark:bg-secondary/60 border-secondary-light dark:border-secondary glow-red"
+        else:
+            base_bg = "bg-tertiary-light/10 dark:bg-tertiary/10 border-tertiary-light/30 dark:border-tertiary/30"
+            fill_bg = "bg-tertiary-light/60 dark:bg-tertiary/60 border-tertiary-light dark:border-tertiary glow-cyan"
+            
         bars = ""
         for k in range(1, 5):
             v = data['shift_scores'][k]
@@ -539,7 +598,7 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
             css_class = fill_bg if is_active else base_bg
             bars += f"""
             <div class="flex flex-col justify-end h-24 flex-1 group">
-                <div class="text-center font-mono text-[9px] text-white/30 mb-2 group-hover:text-white transition-colors">S{k} <br/> {v:.0f}</div>
+                <div class="text-center font-mono text-[9px] text-gray-400 dark:text-white/30 mb-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">S{k} <br/> {v:.0f}</div>
                 <div class="w-full {css_class} border-t-2" style="height: {pct}%;"></div>
             </div>
             """
@@ -550,18 +609,21 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
         for r in keys:
             osr = C['osr'].get(r, 0.0); svc = C['svc'].get(r, 0.0)
             rs = osr * (1.0 - svc / (osr + 1.0)) if (osr + 1.0) != 0.0 else 0.0
-            shifts_html = ''.join(f'<td class="table-cell-custom text-white/70">{clamp_zero(C["shift_osr"][si].get(r, 0.0)):.1f}</td>' for si in range(1, 5))
+            shifts_html = ''.join(f'<td class="table-cell-custom text-gray-600 dark:text-white/70">{clamp_zero(C["shift_osr"][si].get(r, 0.0)):.1f}</td>' for si in range(1, 5))
+            
+            label_color = "text-secondary-light dark:text-[#ffb3ae]" if color_hex == '#ffb3ae' else "text-tertiary-light dark:text-[#74f5ff]"
+            
             out += f'''
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="table-cell-custom text-left" style="color: {color_hex}; font-weight: bold; letter-spacing: 1px;">{r}</td>
-                    <td class="table-cell-custom text-white/90">{C['afr'].get(r, 0.0):.1f}</td>
-                    <td class="table-cell-custom text-white/90">{C['tsp'].get(r, 0.0):.1f}</td>
-                    <td class="table-cell-custom text-white/90">{osr:.1f}</td>
-                    <td class="table-cell-custom text-white/90">{C['dsr'].get(r, 0.0):.1f}</td>
-                    <td class="table-cell-custom text-white/90">{C['efr'].get(r, 0.0):.1f}</td>
-                    <td class="table-cell-custom text-white/40">{svc:.1f}</td>
-                    <td class="table-cell-custom text-white/90">{rs:.1f}</td>
-                    <td class="table-cell-custom text-white/90">{C['ta'].get(r, 0.0):.1f}</td>
+                <tr class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <td class="table-cell-custom text-left {label_color}" style="font-weight: bold; letter-spacing: 1px;">{r}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{C['afr'].get(r, 0.0):.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{C['tsp'].get(r, 0.0):.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{osr:.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{C['dsr'].get(r, 0.0):.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{C['efr'].get(r, 0.0):.1f}</td>
+                    <td class="table-cell-custom text-gray-400 dark:text-white/40">{svc:.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{rs:.1f}</td>
+                    <td class="table-cell-custom text-gray-800 dark:text-white/90">{C['ta'].get(r, 0.0):.1f}</td>
                     {shifts_html}
                 </tr>'''
         return out
@@ -575,7 +637,7 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
         ]
         return "".join(f'<p class="mb-3 before:content-[\'>\'] before:mr-2 before:opacity-50"> {b}</p>' for b in bullets)
 
-    def get_player_roles_html(keys, alliance_name, text_color, glow_class, border_color):
+    def get_player_roles_html(keys, alliance_name, text_color_classes, glow_class, border_color_classes):
         cards_html = ""
         for r in keys:
             stats = {
@@ -589,141 +651,141 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
             if stats[best_role] < 0.5: best_role = "Flex Support"
             overall_impact = sum(stats.values())
             cards_html += f"""
-            <div class="bg-[#1c1b1e]/40 p-4 border-l-2 {border_color} flex justify-between items-center mb-2 hover:bg-[#1c1b1e] transition-colors">
+            <div class="bg-gray-50 dark:bg-[#1c1b1e]/40 p-4 border-l-2 {border_color_classes} flex justify-between items-center mb-2 hover:bg-gray-100 dark:hover:bg-[#1c1b1e] transition-colors shadow-sm dark:shadow-none">
                 <div>
-                    <div class="font-headline font-bold text-sm {text_color} {glow_class} tracking-widest">{r}</div>
-                    <div class="font-mono text-[10px] text-white/50 uppercase tracking-widest mt-1">{best_role}</div>
+                    <div class="font-headline font-bold text-sm {text_color_classes} {glow_class} tracking-widest">{r}</div>
+                    <div class="font-mono text-[10px] text-gray-500 dark:text-white/50 uppercase tracking-widest mt-1">{best_role}</div>
                 </div>
                 <div class="text-right">
-                    <div class="font-mono text-lg text-white/90">{overall_impact:.1f}</div>
-                    <div class="font-mono text-[8px] text-white/30 uppercase">Impact Rating</div>
+                    <div class="font-mono text-lg text-gray-800 dark:text-white/90">{overall_impact:.1f}</div>
+                    <div class="font-mono text-[8px] text-gray-400 dark:text-white/30 uppercase">Impact Rating</div>
                 </div>
             </div>
             """
-        return f'<div class="flex-1"><h4 class="font-headline font-bold text-xs {text_color} uppercase tracking-widest mb-4">{alliance_name} Roster</h4>{cards_html}</div>'
+        return f'<div class="flex-1"><h4 class="font-headline font-bold text-xs {text_color_classes} uppercase tracking-widest mb-4">{alliance_name} Roster</h4>{cards_html}</div>'
     
     html_body = f"""
     <main class="max-w-6xl mx-auto pt-10 pb-20 px-6 relative z-10">
         
-        <div onclick="window.location.href='scout://team/{team_selected}'" class="cursor-pointer text-secondary mb-6 font-mono text-xs hover:text-white transition-colors flex items-center gap-2 w-fit">
+        <div onclick="window.location.href='scout://team/{team_selected}'" class="cursor-pointer text-secondary-light dark:text-secondary mb-6 font-mono text-xs hover:text-red-700 dark:hover:text-white transition-colors flex items-center gap-2 w-fit">
             <span>&larr;</span> BACK TO SCHEDULE
         </div>
 
-        <header class="flex justify-between items-center border-b border-white/10 pb-4 mb-10">
+        <header class="flex justify-between items-center border-b border-gray-200 dark:border-white/10 pb-4 mb-10">
             <div class="flex items-center gap-4">
-                <div class="w-8 h-8 bg-white/10 flex items-center justify-center rounded-sm">
-                    <span class="font-mono text-tertiary text-lg">*</span>
+                <div class="w-8 h-8 bg-black/5 dark:bg-white/10 flex items-center justify-center rounded-sm">
+                    <span class="font-mono text-tertiary-light dark:text-tertiary text-lg">*</span>
                 </div>
-                <h1 class="font-headline font-bold text-2xl text-white tracking-widest">{match_selected.split('_')[-1].upper()}</h1>
+                <h1 class="font-headline font-bold text-2xl text-gray-900 dark:text-white tracking-widest">{match_selected.split('_')[-1].upper()}</h1>
             </div>
             <div class="text-right">
-                <span class="font-mono text-[10px] text-tertiary tracking-[0.2em] uppercase block">Scout Analytics</span>
-                <span class="font-headline text-xs text-white/40 tracking-widest uppercase">{event_label}</span>
+                <span class="font-mono text-[10px] text-tertiary-light dark:text-tertiary tracking-[0.2em] uppercase block">Scout Analytics</span>
+                <span class="font-headline text-xs text-gray-500 dark:text-white/40 tracking-widest uppercase">{event_label}</span>
             </div>
         </header>
 
         <section class="relative mb-12">
-            <div class="absolute -top-20 -right-20 w-96 h-96 bg-secondary-container/10 blur-[120px] rounded-full pointer-events-none"></div>
+            <div class="absolute -top-20 -right-20 w-96 h-96 bg-red-50 dark:bg-secondary-container/10 blur-[120px] rounded-full pointer-events-none"></div>
             <div class="flex items-center gap-2 mb-3">
-                <span class="w-2 h-2 bg-white/80 animate-pulse rounded-full"></span>
-                <span class="font-label text-xs tracking-[0.1em] text-white/60 uppercase font-bold">Live Projection</span>
+                <span class="w-2 h-2 bg-black/80 dark:bg-white/80 animate-pulse rounded-full"></span>
+                <span class="font-label text-xs tracking-[0.1em] text-gray-600 dark:text-white/60 uppercase font-bold">Live Projection</span>
             </div>
             <h2 class="font-headline text-5xl md:text-7xl font-bold tracking-tight uppercase leading-none {w_color_class} mb-4">
                 {winner} WINS {cl(margin)}
             </h2>
-            <p class="font-mono text-white/50 text-sm">{outcome}</p>
+            <p class="font-mono text-gray-500 dark:text-white/50 text-sm">{outcome}</p>
 
-            <div class="mt-12 flex flex-col md:flex-row justify-between items-end border-l-2 border-white/10 pl-6 py-2">
+            <div class="mt-12 flex flex-col md:flex-row justify-between items-end border-l-2 border-gray-200 dark:border-white/10 pl-6 py-2">
                 <div>
-                    <span class="font-headline text-xs text-white/40 uppercase tracking-[0.2em] mb-2 block">Projected Scoreboard</span>
+                    <span class="font-headline text-xs text-gray-500 dark:text-white/40 uppercase tracking-[0.2em] mb-2 block">Projected Scoreboard</span>
                     <div class="flex items-baseline gap-6">
-                        <span class="font-headline text-6xl font-black {'text-secondary glow-red' if R['score'] >= B['score'] else 'text-white/40'} leading-none">{R['score']:.0f}</span>
-                        <span class="font-headline text-2xl font-bold text-white/20 italic">VS</span>
-                        <span class="font-headline text-6xl font-black {'text-tertiary glow-cyan' if B['score'] > R['score'] else 'text-white/40'} leading-none">{B['score']:.0f}</span>
+                        <span class="font-headline text-6xl font-black {'text-secondary-light dark:text-secondary glow-red' if R['score'] >= B['score'] else 'text-gray-400 dark:text-white/40'} leading-none">{R['score']:.0f}</span>
+                        <span class="font-headline text-2xl font-bold text-gray-300 dark:text-white/20 italic">VS</span>
+                        <span class="font-headline text-6xl font-black {'text-tertiary-light dark:text-tertiary glow-cyan' if B['score'] > R['score'] else 'text-gray-400 dark:text-white/40'} leading-none">{B['score']:.0f}</span>
                     </div>
                 </div>
                 <div class="mt-6 md:mt-0 text-right">
-                    <span class="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1">Strategic Edge</span>
-                    <span class="font-body text-sm text-tertiary/80">{strategic}</span>
+                    <span class="font-mono text-[10px] text-gray-500 dark:text-white/40 uppercase tracking-widest block mb-1">Strategic Edge</span>
+                    <span class="font-body text-sm text-tertiary-light dark:text-tertiary/80">{strategic}</span>
                 </div>
             </div>
         </section>
 
-        <div class="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
-            <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-white/50 font-bold">Advanced Metrics</h3>
-            <span class="font-mono text-[10px] text-tertiary/60">REF: SYS.V3</span>
+        <div class="flex justify-between items-end mb-4 border-b border-gray-200 dark:border-white/10 pb-2">
+            <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-white/50 font-bold">Advanced Metrics</h3>
+            <span class="font-mono text-[10px] text-tertiary-light/80 dark:text-tertiary/60">REF: SYS.V3</span>
         </div>
         
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-            <div class="bg-[#0e0e10] p-6 border border-white/5 relative overflow-hidden">
-                <p class="font-headline text-[10px] text-white/40 uppercase tracking-widest mb-6">Tactical System Strength (TSS)</p>
+            <div class="bg-white dark:bg-[#0e0e10] p-6 border border-gray-200 dark:border-white/5 relative overflow-hidden shadow-sm dark:shadow-none">
+                <p class="font-headline text-[10px] text-gray-500 dark:text-white/40 uppercase tracking-widest mb-6">Tactical System Strength (TSS)</p>
                 <div class="flex justify-between items-end">
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-secondary glow-red mb-1">{R['tss']:.1f}</div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Red</div>
+                        <div class="font-mono text-3xl font-bold text-secondary-light dark:text-secondary glow-red mb-1">{R['tss']:.1f}</div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Red</div>
                     </div>
-                    <div class="w-[1px] h-10 bg-white/10"></div>
+                    <div class="w-[1px] h-10 bg-gray-200 dark:bg-white/10"></div>
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-tertiary glow-cyan mb-1">{B['tss']:.1f}</div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Blue</div>
+                        <div class="font-mono text-3xl font-bold text-tertiary-light dark:text-tertiary glow-cyan mb-1">{B['tss']:.1f}</div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Blue</div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-[#0e0e10] p-6 border border-white/5 relative overflow-hidden">
-                <p class="font-headline text-[10px] text-white/40 uppercase tracking-widest mb-6">Efficiency (PHI)</p>
+            <div class="bg-white dark:bg-[#0e0e10] p-6 border border-gray-200 dark:border-white/5 relative overflow-hidden shadow-sm dark:shadow-none">
+                <p class="font-headline text-[10px] text-gray-500 dark:text-white/40 uppercase tracking-widest mb-6">Efficiency (PHI)</p>
                 <div class="flex justify-between items-end">
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-secondary glow-red mb-1">{R['phi']:.2f}</div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Red</div>
+                        <div class="font-mono text-3xl font-bold text-secondary-light dark:text-secondary glow-red mb-1">{R['phi']:.2f}</div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Red</div>
                     </div>
-                    <div class="w-[1px] h-10 bg-white/10"></div>
+                    <div class="w-[1px] h-10 bg-gray-200 dark:bg-white/10"></div>
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-tertiary glow-cyan mb-1">{B['phi']:.2f}</div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Blue</div>
+                        <div class="font-mono text-3xl font-bold text-tertiary-light dark:text-tertiary glow-cyan mb-1">{B['phi']:.2f}</div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Blue</div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-[#0e0e10] p-6 border border-white/5 relative overflow-hidden">
-                <p class="font-headline text-[10px] text-white/40 uppercase tracking-widest mb-6">High-Impact Probability (HIP)</p>
+            <div class="bg-white dark:bg-[#0e0e10] p-6 border border-gray-200 dark:border-white/5 relative overflow-hidden shadow-sm dark:shadow-none">
+                <p class="font-headline text-[10px] text-gray-500 dark:text-white/40 uppercase tracking-widest mb-6">High-Impact Probability (HIP)</p>
                 <div class="flex justify-between items-end">
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-secondary glow-red mb-1">{(R['hip']*100):.1f}<span class="text-sm opacity-50">%</span></div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Red</div>
+                        <div class="font-mono text-3xl font-bold text-secondary-light dark:text-secondary glow-red mb-1">{(R['hip']*100):.1f}<span class="text-sm opacity-50">%</span></div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Red</div>
                     </div>
-                    <div class="w-[1px] h-10 bg-white/10"></div>
+                    <div class="w-[1px] h-10 bg-gray-200 dark:bg-white/10"></div>
                     <div class="text-center">
-                        <div class="font-mono text-3xl font-bold text-tertiary glow-cyan mb-1">{(B['hip']*100):.1f}<span class="text-sm opacity-50">%</span></div>
-                        <div class="font-mono text-[9px] text-white/30 uppercase">Blue</div>
+                        <div class="font-mono text-3xl font-bold text-tertiary-light dark:text-tertiary glow-cyan mb-1">{(B['hip']*100):.1f}<span class="text-sm opacity-50">%</span></div>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 uppercase">Blue</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="bg-gradient-to-b from-[#1c1b1e]/40 to-transparent p-6 border border-white/5 mb-12">
-            <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-white/50 font-bold text-center mb-8">Alliance Pulse / Shift Activation</h3>
+        <section class="bg-gradient-to-b from-gray-100 dark:from-[#1c1b1e]/40 to-transparent p-6 border border-gray-200 dark:border-white/5 mb-12 shadow-sm dark:shadow-none">
+            <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-white/50 font-bold text-center mb-8">Alliance Pulse / Shift Activation</h3>
             <div class="flex flex-col md:flex-row gap-12">
                 <div class="flex-1">
                     <div class="text-center mb-6">
-                        <span class="font-headline font-bold text-secondary text-sm glow-red tracking-widest uppercase">Red Alliance</span>
-                        <div class="font-mono text-[9px] text-white/30 mt-2">ACTIVE: {R['active_shifts']}</div>
+                        <span class="font-headline font-bold text-secondary-light dark:text-secondary text-sm glow-red tracking-widest uppercase">Red Alliance</span>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 mt-2">ACTIVE: {R['active_shifts']}</div>
                     </div>
                     {shift_bars(R, 'red')}
                 </div>
-                <div class="w-[1px] bg-white/5 hidden md:block"></div>
+                <div class="w-[1px] bg-gray-200 dark:bg-white/5 hidden md:block"></div>
                 <div class="flex-1">
                     <div class="text-center mb-6">
-                        <span class="font-headline font-bold text-tertiary text-sm glow-cyan tracking-widest uppercase">Blue Alliance</span>
-                        <div class="font-mono text-[9px] text-white/30 mt-2">ACTIVE: {B['active_shifts']}</div>
+                        <span class="font-headline font-bold text-tertiary-light dark:text-tertiary text-sm glow-cyan tracking-widest uppercase">Blue Alliance</span>
+                        <div class="font-mono text-[9px] text-gray-400 dark:text-white/30 mt-2">ACTIVE: {B['active_shifts']}</div>
                     </div>
                     {shift_bars(B, 'blue')}
                 </div>
             </div>
         </section>
 
-        <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-white/50 font-bold mb-4">Combatant Systems</h3>
-        <section class="bg-[#0e0e10] p-1 border border-white/5 overflow-x-auto mb-12">
+        <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-white/50 font-bold mb-4">Combatant Systems</h3>
+        <section class="bg-white dark:bg-[#0e0e10] p-1 border border-gray-200 dark:border-white/5 overflow-x-auto mb-12 shadow-sm dark:shadow-none">
             <table class="w-full whitespace-nowrap">
                 <thead>
                     <tr>
@@ -751,25 +813,25 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
         </section>
 
         <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div class="bg-[#1c1b1e]/60 p-6 border-l-2 border-secondary/50 backdrop-blur-md">
-                <h4 class="font-headline font-bold text-xs text-secondary uppercase tracking-widest mb-4">Red Narrative</h4>
-                <div class="font-mono text-xs leading-relaxed text-white/70">
+            <div class="bg-gray-50 dark:bg-[#1c1b1e]/60 p-6 border-l-2 border-secondary-light/50 dark:border-secondary/50 backdrop-blur-md shadow-sm dark:shadow-none">
+                <h4 class="font-headline font-bold text-xs text-secondary-light dark:text-secondary uppercase tracking-widest mb-4">Red Narrative</h4>
+                <div class="font-mono text-xs leading-relaxed text-gray-600 dark:text-white/70">
                     {narrative_items(red_keys, 'red', R)}
                 </div>
             </div>
-            <div class="bg-[#1c1b1e]/60 p-6 border-l-2 border-tertiary/50 backdrop-blur-md">
-                <h4 class="font-headline font-bold text-xs text-tertiary uppercase tracking-widest mb-4">Blue Narrative</h4>
-                <div class="font-mono text-xs leading-relaxed text-white/70">
+            <div class="bg-gray-50 dark:bg-[#1c1b1e]/60 p-6 border-l-2 border-tertiary-light/50 dark:border-tertiary/50 backdrop-blur-md shadow-sm dark:shadow-none">
+                <h4 class="font-headline font-bold text-xs text-tertiary-light dark:text-tertiary uppercase tracking-widest mb-4">Blue Narrative</h4>
+                <div class="font-mono text-xs leading-relaxed text-gray-600 dark:text-white/70">
                     {narrative_items(blue_keys, 'blue', B)}
                 </div>
             </div>
         </section>
 
-        <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-white/50 font-bold mb-4">Key Players & Assigned Roles</h3>
-        <section class="flex flex-col md:flex-row gap-6 mb-12 bg-[#0e0e10] p-6 border border-white/5">
-            {get_player_roles_html(red_keys, 'Red Alliance', 'text-secondary', 'glow-red', 'border-secondary/50')}
-            <div class="w-[1px] bg-white/5 hidden md:block"></div>
-            {get_player_roles_html(blue_keys, 'Blue Alliance', 'text-tertiary', 'glow-cyan', 'border-tertiary/50')}
+        <h3 class="font-headline text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-white/50 font-bold mb-4">Key Players & Assigned Roles</h3>
+        <section class="flex flex-col md:flex-row gap-6 mb-12 bg-white dark:bg-[#0e0e10] p-6 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            {get_player_roles_html(red_keys, 'Red Alliance', 'text-secondary-light dark:text-secondary', 'glow-red', 'border-secondary-light/50 dark:border-secondary/50')}
+            <div class="w-[1px] bg-gray-200 dark:bg-white/5 hidden md:block"></div>
+            {get_player_roles_html(blue_keys, 'Blue Alliance', 'text-tertiary-light dark:text-tertiary', 'glow-cyan', 'border-tertiary-light/50 dark:border-tertiary/50')}
         </section>
 
     </main>
@@ -777,7 +839,7 @@ def build_html_report(event_label, event_key, team_selected, match_selected):
     </html>
     """
 
-    return get_html_head() + html_body
+    return get_html_head(is_light_mode) + html_body
 
 
 # ─── PyQt Thread Workers ──────────────────────────────────────────────────────
@@ -799,37 +861,39 @@ class LoaderWorker(QThread):
 
 class LeaderboardWorker(QThread):
     resultReady = pyqtSignal(str)
-    def __init__(self, ev_label, ev_key):
+    def __init__(self, ev_label, ev_key, is_light_mode):
         super().__init__()
         self.ev_label = ev_label
         self.ev_key = ev_key
+        self.is_light_mode = is_light_mode
     def run(self):
-        html = build_leaderboard_html(self.ev_label, self.ev_key)
+        html = build_leaderboard_html(self.ev_label, self.ev_key, self.is_light_mode)
         self.resultReady.emit(html)
 
 class ScheduleWorker(QThread):
     resultReady = pyqtSignal(str)
-    def __init__(self, ev_label, ev_key, team_key):
+    def __init__(self, ev_label, ev_key, team_key, is_light_mode):
         super().__init__()
         self.ev_label = ev_label
         self.ev_key = ev_key
         self.team_key = team_key
+        self.is_light_mode = is_light_mode
     def run(self):
-        html = build_schedule_html(self.ev_label, self.ev_key, self.team_key)
+        html = build_schedule_html(self.ev_label, self.ev_key, self.team_key, self.is_light_mode)
         self.resultReady.emit(html)
 
 class AnalysisWorker(QThread):
     resultReady = pyqtSignal(str)
-    def __init__(self, ev_label, ev_key, t_key, m_key):
+    def __init__(self, ev_label, ev_key, t_key, m_key, is_light_mode):
         super().__init__()
         self.ev_label = ev_label
         self.ev_key = ev_key
         self.t_key = t_key
         self.m_key = m_key
+        self.is_light_mode = is_light_mode
         
     def run(self):
-        # Pass both ev_label and ev_key here!
-        html = build_html_report(self.ev_label, self.ev_key, self.t_key, self.m_key)
+        html = build_html_report(self.ev_label, self.ev_key, self.t_key, self.m_key, self.is_light_mode)
         self.resultReady.emit(html)
 
 # ─── Custom WebEnginePage for interception ────────────────────────────────────
@@ -842,8 +906,8 @@ class WebAppPage(QWebEnginePage):
             return False
         return super().acceptNavigationRequest(url, _type, isMainFrame)
 
-# ─── PyQt GUI ─────────────────────────────────────────────────────────────────
-APP_STYLE = """
+# ─── PyQt GUI Styles ──────────────────────────────────────────────────────────
+DARK_STYLE = """
     QMainWindow { background-color: #08080A; }
     QWidget { font-family: "Segoe UI", sans-serif; color: #e5e1e4; }
     QFrame#Sidebar { background-color: #0e0e10; border-right: 1px solid #1c1b1e; }
@@ -855,10 +919,28 @@ APP_STYLE = """
     QComboBox:disabled { background-color: #08080A; border: 1px solid #1c1b1e; color: #353437; }
     QComboBox::drop-down { border: none; width: 20px; }
     QComboBox QAbstractItemView { background-color: #1c1b1e; border: 1px solid #353437; selection-background-color: #353437; color: #e5e1e4; }
-    QPushButton#LoadBtn { background-color: #74f5ff; color: #000000; border: none; border-radius: 0px; padding: 14px; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+    QPushButton#LoadBtn, QPushButton#ThemeBtn { background-color: #74f5ff; color: #000000; border: none; border-radius: 0px; padding: 14px; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
     QPushButton#LoadBtn:disabled { background-color: #1c1b1e; color: #5d5f5f; }
-    QPushButton#LoadBtn:hover:!disabled { background-color: #a5f8ff; }
+    QPushButton#LoadBtn:hover:!disabled, QPushButton#ThemeBtn:hover { background-color: #a5f8ff; }
     QLabel#StatusLabel { color: #5d5f5f; font-size: 11px; margin-top: 10px; }
+"""
+
+LIGHT_STYLE = """
+    QMainWindow { background-color: #f8fafc; }
+    QWidget { font-family: "Segoe UI", sans-serif; color: #0f172a; }
+    QFrame#Sidebar { background-color: #ffffff; border-right: 1px solid #e2e8f0; }
+    QLabel#LogoStar { color: #008b99; font-size: 24px; }
+    QLabel#LogoText { font-size: 18px; font-weight: bold; }
+    QLabel#LogoHighlight { color: #008b99; font-size: 18px; font-weight: bold; }
+    QLabel#SectionLabel { color: #64748b; font-family: "Consolas", monospace; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-top: 15px; }
+    QComboBox { background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 0px; padding: 8px; color: #0f172a; }
+    QComboBox:disabled { background-color: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; }
+    QComboBox::drop-down { border: none; width: 20px; }
+    QComboBox QAbstractItemView { background-color: #f1f5f9; border: 1px solid #cbd5e1; selection-background-color: #e2e8f0; color: #0f172a; }
+    QPushButton#LoadBtn, QPushButton#ThemeBtn { background-color: #008b99; color: #ffffff; border: none; border-radius: 0px; padding: 14px; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+    QPushButton#LoadBtn:disabled { background-color: #e2e8f0; color: #94a3b8; }
+    QPushButton#LoadBtn:hover:!disabled, QPushButton#ThemeBtn:hover { background-color: #00707a; }
+    QLabel#StatusLabel { color: #64748b; font-size: 11px; margin-top: 10px; }
 """
 
 class ScoutApp(QMainWindow):
@@ -869,6 +951,7 @@ class ScoutApp(QMainWindow):
         
         self.event_map = {}
         self.current_team = None
+        self.is_light_mode = False
         
         central = QWidget()
         self.setCentralWidget(central)
@@ -920,33 +1003,38 @@ class ScoutApp(QMainWindow):
         sidebar_layout.addWidget(self.lbl_status)
         
         sidebar_layout.addStretch()
+
+        self.btn_theme = QPushButton("Light Mode")
+        self.btn_theme.setObjectName("ThemeBtn")
+        sidebar_layout.addWidget(self.btn_theme)
+        
         main_layout.addWidget(sidebar)
         
         self.web_view = QWebEngineView()
         self.web_page = WebAppPage(self.web_view)
         self.web_page.navigation_requested.connect(self.handle_navigation)
         self.web_view.setPage(self.web_page)
+        self.web_view.setHtml(get_placeholder_html(self.is_light_mode))
         
-        placeholder_html = """
-        <html>
-        <body style='background:#08080A; color:#e5e1e4; font-family:"Segoe UI", sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;'>
-            <div style='text-align:center;'>
-                <div style='color:#74f5ff; font-family:Consolas, monospace; font-size:12px; letter-spacing:2px; margin-bottom:10px;'>SYSTEM OFFLINE</div>
-                <h1 style='color:#ffffff; font-size:24px; text-transform:uppercase; letter-spacing:1px;'>Awaiting Event Selection</h1>
-            </div>
-        </body>
-        </html>
-        """
-        self.web_view.setHtml(placeholder_html)
         main_layout.addWidget(self.web_view, 1)
         
         self.cb_week.currentTextChanged.connect(self.on_week)
         self.cb_event.currentTextChanged.connect(lambda: self.btn_load.setEnabled(bool(self.cb_event.currentText())))
         self.btn_load.clicked.connect(self.load_leaderboard)
+        self.btn_theme.clicked.connect(self.toggle_theme)
 
         self.setup_worker = SetupWorker()
         self.setup_worker.finished.connect(self.bootstrap_done)
         self.setup_worker.start()
+
+    def toggle_theme(self):
+        self.is_light_mode = not self.is_light_mode
+        self.setStyleSheet(LIGHT_STYLE if self.is_light_mode else DARK_STYLE)
+        self.btn_theme.setText("Dark Mode" if self.is_light_mode else "Light Mode")
+        
+        # Dynamically toggle the CSS class on the current webview without reloading the API calls
+        js = f"if({str(self.is_light_mode).lower()}) {{ document.documentElement.classList.remove('dark'); }} else {{ document.documentElement.classList.add('dark'); }}"
+        self.web_view.page().runJavaScript(js)
 
     def bootstrap_done(self, wm):
         self.cb_week.setEnabled(True)
@@ -959,30 +1047,16 @@ class ScoutApp(QMainWindow):
 
     def set_loading(self, message):
         self.lbl_status.setText(message)
-        self.lbl_status.setStyleSheet("color: #74f5ff; font-size: 11px; margin-top: 10px;")
+        color = "#008b99" if self.is_light_mode else "#74f5ff"
+        self.lbl_status.setStyleSheet(f"color: {color}; font-size: 11px; margin-top: 10px;")
 
     def clear_loading(self, message):
         self.lbl_status.setText(message)
-        self.lbl_status.setStyleSheet("color: #5d5f5f; font-size: 11px; margin-top: 10px;")
+        color = "#64748b" if self.is_light_mode else "#5d5f5f"
+        self.lbl_status.setStyleSheet(f"color: {color}; font-size: 11px; margin-top: 10px;")
 
     def show_web_loading(self):
-        loading_html = """
-        <html>
-        <body style='background:#08080A; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;'>
-            <div style='text-align:center;'>
-                <div style='color:#74f5ff; font-family:Consolas, monospace; font-size:12px; letter-spacing:2px; margin-bottom:15px; animation: pulse 1.5s infinite;'>PROCESSING DATA CUBE</div>
-                <div style='width: 200px; height: 2px; background: #1c1b1e; margin: 0 auto; overflow: hidden;'>
-                    <div style='width: 50%; height: 100%; background: #74f5ff; transform: translateX(-100%); animation: load 1s infinite linear;'></div>
-                </div>
-            </div>
-            <style>
-                @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
-                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-            </style>
-        </body>
-        </html>
-        """
-        self.web_view.setHtml(loading_html)
+        self.web_view.setHtml(get_loading_html(self.is_light_mode))
 
     def on_week(self, wk):
         if not wk: return
@@ -1031,7 +1105,7 @@ class ScoutApp(QMainWindow):
         
         self.set_loading("Executing analytical models for event...")
         self.show_web_loading()
-        self.w_lb = LeaderboardWorker(ev_label, ev_key)
+        self.w_lb = LeaderboardWorker(ev_label, ev_key, self.is_light_mode)
         self.w_lb.resultReady.connect(self.view_loaded)
         self.w_lb.start()
 
@@ -1042,7 +1116,7 @@ class ScoutApp(QMainWindow):
         
         self.set_loading(f"Loading schedule for {team_key}...")
         self.show_web_loading()
-        self.w_sch = ScheduleWorker(ev_label, ev_key, team_key)
+        self.w_sch = ScheduleWorker(ev_label, ev_key, team_key, self.is_light_mode)
         self.w_sch.resultReady.connect(self.view_loaded)
         self.w_sch.start()
 
@@ -1053,7 +1127,7 @@ class ScoutApp(QMainWindow):
         
         self.set_loading(f"Analyzing match {match_key}...")
         self.show_web_loading()
-        self.w_match = AnalysisWorker(ev_label, ev_key, self.current_team, match_key)
+        self.w_match = AnalysisWorker(ev_label, ev_key, self.current_team, match_key, self.is_light_mode)
         self.w_match.resultReady.connect(self.view_loaded)
         self.w_match.start()
 
@@ -1063,7 +1137,7 @@ class ScoutApp(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setStyleSheet(APP_STYLE)
     window = ScoutApp()
+    window.setStyleSheet(DARK_STYLE)
     window.show()
     sys.exit(app.exec())
