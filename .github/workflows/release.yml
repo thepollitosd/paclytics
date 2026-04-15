@@ -9,20 +9,22 @@ on:
 
 jobs:
   build:
-    # Only run when the PR is actually merged (not just closed)
     if: github.event.pull_request.merged == true
     strategy:
       matrix:
         include:
           - os: windows-latest
             artifact_name: Paclytics-windows
-            zip_cmd: pwsh -Command "Compress-Archive -Path dist/scout -DestinationPath dist/Paclytics-windows.zip"
+            exe: dist/scout.exe
+            zip_cmd: pwsh -Command "Compress-Archive -Path dist/scout.exe -DestinationPath dist/Paclytics-windows.zip"
           - os: macos-latest
             artifact_name: Paclytics-macos
-            zip_cmd: zip -r dist/Paclytics-macos.zip dist/scout
+            exe: dist/scout
+            zip_cmd: zip dist/Paclytics-macos.zip dist/scout
           - os: ubuntu-latest
             artifact_name: Paclytics-linux
-            zip_cmd: zip -r dist/Paclytics-linux.zip dist/scout
+            exe: dist/scout
+            zip_cmd: zip dist/Paclytics-linux.zip dist/scout
 
     runs-on: ${{ matrix.os }}
 
@@ -60,8 +62,14 @@ jobs:
           pip install numpy scipy PyQt6 PyQt6-WebEngine pyinstaller
 
       - name: Build with PyInstaller
+        run: pyinstaller scout.spec
+
+      - name: Verify build output
+        shell: bash
         run: |
-          pyinstaller scout.spec
+          echo "Contents of dist/:"
+          ls -lh dist/
+          test -f "${{ matrix.exe }}" || (echo "ERROR: Expected output ${{ matrix.exe }} not found!" && exit 1)
 
       - name: Zip the build output
         run: ${{ matrix.zip_cmd }}
